@@ -1,0 +1,94 @@
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+public class DrawingProgram {
+
+  public static void main(String[] args) {
+    JFrame frame = new JFrame("Välkommen till ritprogrammet!");
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    Model model = new Model();
+    Canvas canvas = new Canvas(model);
+    ControlPanel controlPanel = new ControlPanel(model, canvas);
+
+    frame.add(canvas, BorderLayout.CENTER);
+    frame.add(controlPanel, BorderLayout.SOUTH);
+
+    frame.pack();
+    frame.setVisible(true);
+  }
+}
+
+class Model {
+  private List<Point> points = new ArrayList<Point>();
+
+  public void addPoint(Point p) {
+    points.add(p);
+  }
+
+  public List<Point> getPoints() {
+    return points;
+  }
+
+  public void clearPoints() {
+    points.clear();
+  }
+}
+
+class Canvas extends JPanel {
+  private Model model;
+
+  public Canvas(Model model) {
+    this.model = model;
+    setPreferredSize(new Dimension(400, 400));
+    setBackground(Color.WHITE);
+    addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        model.addPoint(e.getPoint());
+        repaint();
+      }
+    });
+  }
+
+  @Override
+  protected void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    g.setColor(Color.BLACK);
+    for (Point p : model.getPoints()) {
+      g.fillOval(p.x - 5, p.y - 5, 10, 10);
+    }
+  }
+}
+
+class ControlPanel extends JPanel {
+  private Model model;
+  private Canvas canvas;
+
+  public ControlPanel(Model model, Canvas canvas) {
+    this.model = model;
+    this.canvas = canvas;
+    JButton clearButton = new JButton("Rensa");
+    clearButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        model.clearPoints();
+        canvas.repaint();
+      }
+    });
+    add(clearButton);
+  }
+}
